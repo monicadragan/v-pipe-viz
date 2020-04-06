@@ -1,0 +1,379 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="data.js"></script>
+
+
+<html>
+<head>
+<style>
+div.tooltip {
+  position: absolute;
+  text-align: left;
+  padding: .5rem;
+  background: #FFFFFF;
+  color: #313639;
+  border: 1px solid #313639;
+  border-radius: 8px;
+  pointer-events: none;
+  font-size: 1.3rem;
+}
+</style>
+</head>
+<title>V-Pipe Viz</title>
+<body>
+
+<br/><br/>
+<div id="my_dataviz"></div>
+<div id="genomic_patches"></div>
+
+
+<script>
+
+console.log(coverage)
+
+var gffData = {"genomeLength": 29903, "features": [{"id": "NC_045512.2", "type": "five_prime_UTR", "name": "id-NC_045512.2:1..265", "start": 0, "end": 265}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp01", "start": 265, "end": 21555}, {"id": "NC_045512.2", "type": "stem_loop", "name": "id-GU280_gp01", "start": 13475, "end": 13503}, {"id": "NC_045512.2", "type": "stem_loop", "name": "id-GU280_gp01-2", "start": 13487, "end": 13542}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp02", "start": 21562, "end": 25384}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp03", "start": 25392, "end": 26220}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp04", "start": 26244, "end": 26472}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp05", "start": 26522, "end": 27191}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp06", "start": 27201, "end": 27387}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp07", "start": 27393, "end": 27759}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp08", "start": 27755, "end": 27887}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp09", "start": 27893, "end": 28259}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp10", "start": 28273, "end": 29533}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp11", "start": 29557, "end": 29674}, {"id": "NC_045512.2", "type": "stem_loop", "name": "id-GU280_gp11", "start": 29608, "end": 29644}, {"id": "NC_045512.2", "type": "stem_loop", "name": "id-GU280_gp11-2", "start": 29628, "end": 29657}, {"id": "NC_045512.2", "type": "three_prime_UTR", "name": "id-NC_045512.2:29675..29903", "start": 29674, "end": 29903}, {"id": "NC_045512.2", "type": "stem_loop", "name": "id-NC_045512.2:29728..29768", "start": 29727, "end": 29768}]}
+
+// set the dimensions and margins of the graph
+var margin = {
+        top: 10,
+        right: 60,
+        bottom: 50,
+        left: 60
+    },
+    width = 900 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+var data = []
+for (i = 0; i < coverage.length; i++) {
+    data.push({
+        "offset": i,
+        "value": coverage[i],
+        "base": consensus.charAt(i)
+    })
+}
+
+// Add X axis 
+var x = d3.scaleLinear()
+    .domain(d3.extent(data, function(d) {
+        return d.offset;
+    }))
+    .range([0, width])
+xAxis = svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).ticks(5))
+
+svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Coverage");
+
+// Add Y axis
+var y = d3.scaleLinear()
+    .domain([0, d3.max(data, function(d) {
+        return +d.value;
+    })])
+    .range([height, 0]);
+yAxis = svg.append("g")
+    .call(d3.axisLeft(y));
+svg.append("text")
+    .attr("transform",
+        "translate(" + (width + margin.left - 30) + " ," +
+        (height + margin.top) + ")")
+    .style("text-anchor", "middle")
+    .text("Offset");
+
+// Add a clipPath: everything out of this area won't be drawn.
+var clip = svg.append("defs").append("svg:clipPath")
+    .attr("id", "clip")
+    .append("svg:rect")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("x", 0)
+    .attr("y", 0);
+
+// Add brushing that triggers updateChart()
+var brush = d3.brushX()
+    .extent([
+        [0, 0],
+        [width, height]
+    ]) // select the whole graph area
+    .on("end", updateChart)
+
+// Create the area variable: where both the area and the brush take place
+var area = svg.append('g')
+    .attr("clip-path", "url(#clip)")
+
+// Create an area generator
+var areaGenerator = d3.area()
+    .x(function(d) {
+        return x(d.offset)
+    })
+    .y0(y(0))
+    .y1(function(d) {
+        return y(d.value)
+    })
+    .curve(d3.curveMonotoneX)
+
+// Add the area
+area.append("path")
+    .datum(data)
+    .attr("class", "myArea")
+    .attr("fill", "steelblue")
+    .attr("fill-opacity", .2)
+    .attr("stroke", "black")
+    .attr("stroke-width", 0)
+    .attr("d", areaGenerator)
+
+var tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0)
+
+var max_coverage = Math.max(...coverage)
+
+// Add lollipops
+function addLollipops() {
+    area.selectAll("lines")
+        .data(vcfData)
+        .enter()
+        .append("line")
+        .attr("x1", function(d) {
+            return x(d.position)
+        })
+        .attr("x2", function(d) {
+            return x(d.position)
+        })
+        .attr("y1", function(d) {
+            return y(max_coverage / 3)
+        })
+        .attr("y2", y(0))
+        .attr("stroke", "darkgrey")
+        .attr("class", "lollipops")
+
+    area.selectAll("circles")
+        .data(vcfData)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return x(d.position)
+        })
+        .attr("cy", function(d) {
+            return y(max_coverage / 3)
+        })
+        .attr("r", "4")
+        .style("fill", "grey")
+        .attr("stroke", "black")
+        .attr("stroke-width", 0)
+        .attr("class", "circles")
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9)
+            tooltip.html(
+                    "variant: " + d.variant + "<br>" +
+                    "pvalue: " + d.pvalue + "<br>" +
+                    "position: " + d.position
+                )
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+        })
+        .on("mousemove", function(d) {
+            tooltip
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0)
+        })
+}
+
+addLollipops()
+
+// Add the brushing 
+area.append("g")
+    .attr("class", "brush")
+    .call(brush)
+
+// A function that set idleTimeOut to null
+var idleTimeout
+
+function idled() {
+    idleTimeout = null;
+}
+
+// A function that update the chart for given boundaries
+function updateChart() {
+
+    // Get the selected boundaries.
+    extent = d3.event.selection
+
+    // If no selection, back to initial coordinate. Otherwise, update X axis domain
+    if (!extent) {
+        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+        x.domain([4, 8])
+    } else {
+        lower_bound = x.invert(extent[0])
+        upper_bound = x.invert(extent[1])
+
+        if (upper_bound - lower_bound < 10) {
+            middle = (upper_bound + lower_bound) / 2
+            lower_bound = middle - 5
+            upper_bound = middle + 5
+        }
+        x.domain([Math.round(lower_bound), Math.round(upper_bound)])
+        area.select(".brush").call(brush.move, null) // remove the grey brush area as soon as the selection has been done
+    }
+
+    // Update axis and area position
+    xAxis.transition().duration(1000).call(d3.axisBottom(x).ticks(5))
+    area.select('.myArea')
+        .transition()
+        .duration(1000)
+        .attr("d", areaGenerator)
+
+    // Update the lollipops
+    filtered_vcf = vcfData.filter(item => item.position > lower_bound && item.position < upper_bound)
+    d3.selectAll(".lollipops").remove();
+    d3.selectAll(".circles").remove();
+    d3.selectAll(".annotation_rects").remove();
+    d3.selectAll(".annotation_texts").remove();
+    d3.selectAll(".annotation_labels").remove();
+    addLollipops()
+
+}
+
+// If user double click, reinitialize the chart
+svg.on("dblclick", function() {
+    x.domain(d3.extent(data, function(d) {
+        return d.offset;
+    }))
+    xAxis.transition().call(d3.axisBottom(x).ticks(5))
+    area
+        .select('.myArea')
+        .transition()
+        .attr("d", areaGenerator)
+    d3.selectAll(".lollipops").remove();
+    d3.selectAll(".circles").remove();
+    addLollipops()
+
+});
+
+/*function create_gff_plot() {
+
+  // add data
+  var typeList = Array.from(
+    new Set(
+      gffData.features.map(function (x) { return x.type })
+    )
+  )
+  var colorScale = d3.scaleOrdinal()
+    .domain(typeList)
+    .range(d3.schemeSet3)
+  svg.selectAll("rects")
+    .data(gffData.features)
+    .enter()
+    .append("rect")
+      .attr("x", function(d) { return x(d.start) })
+      .attr("y", 0)
+      .attr("width", function(d) { return x(d.end - d.start) })
+      .attr("height", 30)
+      .attr("fill", function(d) { return colorScale(d.type) })
+      .attr("stroke", "black")
+      .attr("stroke-width", 1)
+      .attr("class", "annotation_rects")
+      .on("mouseover", function(d) {
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", .9)
+        tooltip.html(
+          "name: " + d.name + "<br>" +
+          "type: " + d.type
+        )
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY - 28) + "px")
+        })
+      .on("mousemove", function(d) {
+        tooltip
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY - 28) + "px")
+      })
+      .on("mouseout", function(d) {
+        tooltip.transition()
+          .duration(200)
+          .style("opacity", 0)
+      })
+
+      svg.selectAll("labels")
+        .data(gffData.features)
+        .enter()
+        .append("text")
+          .attr("x", function(d) {
+            return x(d.start) + x(d.end - d.start) / 2
+          })
+          .attr("y", function(d) { return 15 })
+          .text(function(d) {
+            return (d.end - d.start) > 2000 ? d.name : ""
+          })
+
+  // add legend
+  var size = 10
+
+  var legendHolder = svg.append("g")
+    .attr("transform", "translate(" + (width + 10) + ", 0)")
+
+/*
+  legendHolder.selectAll("legend_rects")
+    .data(typeList)
+    .enter()
+    .append("rect")
+      .attr("x", 0)
+      .attr("y", function(d, i) { return i * (size + 5) })
+      .attr("width", size)
+      .attr("height", size)
+      .style("fill", function(d) { return colorScale(d) })
+      .attr("class", "annotation_texts")
+
+
+  legendHolder.selectAll("legend_labels")
+    .data(typeList)
+    .enter()
+    .append("text")
+      .attr("x", size * 1.2)
+      .attr("y", function(d, i) { return i * (size + 5) + (size / 2) })
+      .style("fill", "black")
+      .text(function(d) { return d })
+      .attr("text-anchor", "left")
+      .style("alignment-baseline", "middle")
+      .style("font-size", size + "px")
+      .attr("class", "annotation_labels")
+*/
+
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
