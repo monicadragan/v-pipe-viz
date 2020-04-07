@@ -7,7 +7,6 @@
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="data.js"></script>
 
-
 <html>
 <head>
 <style>
@@ -21,6 +20,20 @@ div.tooltip {
   border-radius: 8px;
   pointer-events: none;
 }
+
+#table_summary_table {
+  border: 1px solid black;
+}
+#table_summary_table tr:nth-child(even){
+  background-color: lightgrey;
+}
+
+#block_container > div {
+    float: left;
+    margin-right: 50px;
+    display: inline-block;
+    vertical-align: top;
+}
 </style>
 </head>
 <title>V-Pipe Viz</title>
@@ -28,19 +41,20 @@ div.tooltip {
 
 <br/><br/>
 
-<b>SRR10903402/20200102 </b>
+<b>SRR10903401/20200102 </b><br/>
 <hr style="border: 2px solidgray;" />
 
-<div id="plot"></div>
+<div id="block_container">
+  <div id="plot"></div>
+  <div id="table_summary" style="overflow: auto; max-height: 700px;"></div>
+</div>
 
 <script>
 
 var gffData = {'Genes_NC_045512.2': [{'id': 'NC_045512.2', 'type': 'five_prime_UTR', 'name': 'id-NC_045512.2:1..265', 'start': 0, 'end': 265, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp01', 'start': 265, 'end': 21555, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp02', 'start': 21562, 'end': 25384, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp03', 'start': 25392, 'end': 26220, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp04', 'start': 26244, 'end': 26472, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp05', 'start': 26522, 'end': 27191, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp06', 'start': 27201, 'end': 27387, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp07', 'start': 27393, 'end': 27759, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp09', 'start': 27893, 'end': 28259, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp10', 'start': 28273, 'end': 29533, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp11', 'start': 29557, 'end': 29674, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'three_prime_UTR', 'name': 'id-NC_045512.2:29675..29903', 'start': 29674, 'end': 29903, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp01', 'start': 13475, 'end': 13503, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp08', 'start': 27755, 'end': 27887, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp11', 'start': 29608, 'end': 29644, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-NC_045512.2:29728..29768', 'start': 29727, 'end': 29768, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp01-2', 'start': 13487, 'end': 13542, 'row_cnt': 2}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp11-2', 'start': 29628, 'end': 29657, 'row_cnt': 2}], 'Sars-Cov2_Mature_products': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp1', 'start': 265, 'end': 805, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp2', 'start': 805, 'end': 2719, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp3', 'start': 2719, 'end': 8554, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp4', 'start': 8554, 'end': 10054, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '3CL-PRO', 'start': 10054, 'end': 10972, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp6', 'start': 10972, 'end': 11842, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp7', 'start': 11842, 'end': 12091, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp8', 'start': 12091, 'end': 12685, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp9', 'start': 12685, 'end': 13024, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp10', 'start': 13024, 'end': 13441, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Pol', 'start': 13441, 'end': 16236, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Hel', 'start': 16236, 'end': 18039, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ExoN', 'start': 18039, 'end': 19620, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Uridylate-spec...', 'start': 19620, 'end': 20658, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': "2'-O-methyltra...", 'start': 20658, 'end': 21552, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'S glycoprotein', 'start': 21598, 'end': 25381, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF3a', 'start': 25392, 'end': 26217, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'E protein', 'start': 26244, 'end': 26469, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'M protein', 'start': 26522, 'end': 27188, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ns6', 'start': 27201, 'end': 27384, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF7a', 'start': 27438, 'end': 27756, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ns8', 'start': 27938, 'end': 28256, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'NC', 'start': 28273, 'end': 29530, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'pp1ab', 'start': 265, 'end': 21552, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Spike protein S1', 'start': 21598, 'end': 23617, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Spike protein S2', 'start': 23617, 'end': 25381, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ns7b', 'start': 27755, 'end': 27884, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF-9b', 'start': 28283, 'end': 28574, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF14', 'start': 28733, 'end': 28952, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'pp1a', 'start': 265, 'end': 13480, 'row_cnt': 2}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': "Spike protein S2'", 'start': 24007, 'end': 25381, 'row_cnt': 2}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp11', 'start': 13441, 'end': 13480, 'row_cnt': 3}], 'Sars-Cov2_Protein_domains': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Macro', 'start': 3337, 'end': 3847, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Peptidase C16', 'start': 5164, 'end': 5959, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal', 'start': 7003, 'end': 7216, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup1', 'start': 8653, 'end': 9397, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup2', 'start': 9625, 'end': 9646, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Peptidase C30', 'start': 10054, 'end': 10972, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup3', 'start': 11086, 'end': 11089, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup4', 'start': 11230, 'end': 11284, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup5', 'start': 11515, 'end': 11599, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'RdRp catalytic', 'start': 15273, 'end': 15762, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'CV ZBD', 'start': 16236, 'end': 16488, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '+)RNA virus he...', 'start': 17004, 'end': 17550, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '+)RNA virus he..._dup1', 'start': 17550, 'end': 18060, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Virion surface', 'start': 26244, 'end': 26292, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Intravirion', 'start': 26355, 'end': 26469, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Virion surface_dup1', 'start': 26525, 'end': 26579, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Intravirion_dup1', 'start': 26642, 'end': 26672, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Virion surface_dup2', 'start': 26735, 'end': 26759, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Intravirion_dup2', 'start': 26822, 'end': 27188, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'X4e', 'start': 27438, 'end': 27636, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '9b', 'start': 28304, 'end': 28574, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'zinc finger', 'start': 5518, 'end': 5632, 'row_cnt': 1}], 'Sars-Cov2_highlights': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Receptor-bindi...', 'start': 22516, 'end': 23185, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Fusion peptide', 'start': 23923, 'end': 23980, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Heptad repeat 1', 'start': 24319, 'end': 24472, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Heptad repeat 2', 'start': 25048, 'end': 25168, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'RNA-binding', 'start': 28393, 'end': 28831, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Dimerization', 'start': 29044, 'end': 29356, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'binds ACE2', 'start': 22870, 'end': 23086, 'row_cnt': 1}], 'Sars-Cov2_TM_domains': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane', 'start': 6940, 'end': 7003, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup1', 'start': 7216, 'end': 7279, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup2', 'start': 7279, 'end': 7342, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup3', 'start': 7345, 'end': 7408, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup4', 'start': 8590, 'end': 8653, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup5', 'start': 9397, 'end': 9460, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup6', 'start': 9493, 'end': 9556, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup7', 'start': 9562, 'end': 9625, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup8', 'start': 9646, 'end': 9709, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup9', 'start': 9757, 'end': 9820, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup10', 'start': 11023, 'end': 11086, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup11', 'start': 11089, 'end': 11152, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup12', 'start': 11167, 'end': 11230, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup13', 'start': 11284, 'end': 11347, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup14', 'start': 11452, 'end': 11515, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup15', 'start': 11599, 'end': 11662, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup16', 'start': 25201, 'end': 25264, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup17', 'start': 25494, 'end': 25557, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup18', 'start': 25602, 'end': 25665, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup19', 'start': 25671, 'end': 25734, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup20', 'start': 26292, 'end': 26355, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup21', 'start': 26579, 'end': 26642, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup22', 'start': 26672, 'end': 26735, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup23', 'start': 26759, 'end': 26822, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup24', 'start': 27678, 'end': 27741, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup25', 'start': 27779, 'end': 27842, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup26', 'start': 28871, 'end': 28934, 'row_cnt': 0}]}
 
+create_table_summary("table_summary")
 
-
-
-var gffData2 = {"features": [{"id": "NC_045512.2", "type": "five_prime_UTR", "name": "id-NC_045512.2:1..265", "start": 0, "end": 1065}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp05", "start": 3000, "end": 8000}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp05", "start": 10000, "end": 17000}, {"id": "NC_045512.2", "type": "gene", "name": "gene-GU280_gp06", "start": 20201, "end": 27387}, {"id": "NC_045512.2", "type": "stem_loop", "name": "id-GU280_gp11-2", "start": 29628, "end": 29657}]}
 
 var type_set = new Set()
 for(key in gffData) {
@@ -72,11 +86,11 @@ function displayGffData(gffData, canvas, annotations_color_scale) {
 var margin = {
         top: 10,
         right: 60,
-        bottom: 1700,
+        bottom: 500,
         left: 60
     },
     width = 900 - margin.left - margin.right,
-    height = 2000 - margin.top - margin.bottom;
+    height = 800 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 var svg = d3.select("#plot")
@@ -402,6 +416,41 @@ function create_gff_plot(canvas, offset_y, features, title, colorScale, type_lis
       .style("alignment-baseline", "middle")
       .style("font-size", size + "px")
       .attr("class", "annotation_labels")*/
+}
+
+function create_table_summary(div_id) {
+  // create table
+  var tbl = document.createElement("table")
+  tbl.setAttribute("id", "table_summary_table")
+
+  // add header
+  var header = tbl.createTHead()
+  var tr = header.insertRow()
+  for(var key in vcfData[0]) {
+    // assumes all entries have same keys
+    var td = tr.insertCell()
+    bold = document.createElement('strong'),
+    bold.appendChild(document.createTextNode(key));
+    td.appendChild(bold)
+  }
+
+  // add content
+  vcfData.sort((r1, r2) => r1.position - r2.position);
+
+  for(var entry of vcfData) {
+    var tr = tbl.insertRow()
+
+    for(var key in entry) {
+      var value = entry[key]
+      var td = tr.insertCell()
+
+      td.appendChild(document.createTextNode(value))
+    }
+  }
+
+  // add table to container
+  var container = document.getElementById(div_id)
+  container.appendChild(tbl)
 }
 
 
