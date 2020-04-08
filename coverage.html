@@ -1,14 +1,14 @@
-<!-- Code from d3-graph-gallery.com -->
 <!DOCTYPE html>
 <meta charset="utf-8">
 
-<!-- Load d3.js -->
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="data.js"></script>
 
 <html>
 <head>
+<title>V-Pipe Viz</title>
+
 <style>
 div.tooltip {
   position: absolute;
@@ -35,51 +35,42 @@ div.tooltip {
     vertical-align: top;
 }
 </style>
+
+<script>
+// We expect the following variables: 
+// `sample_name`: string
+// `consensus`: string
+// `coverage`: array of integers
+// `vcfData`: array of tuples, e.g., {"position": 12972, "variant": ["G"], "pvalue": 1.0}
+// `gffData`: map where the key is a string describing the annotations and the value is an 
+//            array of tuples with the following format: {'id': string, 'type': string, 
+//            'name': string, 'start': int, 'end': int, 'row_cnt': int},
+{EXTERNAL_SNAKEMAKE_CODE_MARKER}
+</script>
+
 </head>
-<title>V-Pipe Viz</title>
 <body>
 
-<br/><br/>
+  <br/>
+  <b><p id="sample_name"></p></b> 
+  <hr style="border: 2px solidgray;" />
 
-<b>SRR10903401/20200102 </b><br/>
-<hr style="border: 2px solidgray;" />
+  <div id="block_container">
+    <div id="plot"></div>
+    <div id="table_summary" style="overflow: auto; max-height: 700px;"></div>
+  </div>
 
-<div id="block_container">
-  <div id="plot"></div>
-  <div id="table_summary" style="overflow: auto; max-height: 700px;"></div>
-</div>
+</body>
+</html>
 
 <script>
 
-var gffData = {'Genes_NC_045512.2': [{'id': 'NC_045512.2', 'type': 'five_prime_UTR', 'name': 'id-NC_045512.2:1..265', 'start': 0, 'end': 265, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp01', 'start': 265, 'end': 21555, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp02', 'start': 21562, 'end': 25384, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp03', 'start': 25392, 'end': 26220, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp04', 'start': 26244, 'end': 26472, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp05', 'start': 26522, 'end': 27191, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp06', 'start': 27201, 'end': 27387, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp07', 'start': 27393, 'end': 27759, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp09', 'start': 27893, 'end': 28259, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp10', 'start': 28273, 'end': 29533, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp11', 'start': 29557, 'end': 29674, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'three_prime_UTR', 'name': 'id-NC_045512.2:29675..29903', 'start': 29674, 'end': 29903, 'row_cnt': 0}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp01', 'start': 13475, 'end': 13503, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'gene', 'name': 'gene-GU280_gp08', 'start': 27755, 'end': 27887, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp11', 'start': 29608, 'end': 29644, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-NC_045512.2:29728..29768', 'start': 29727, 'end': 29768, 'row_cnt': 1}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp01-2', 'start': 13487, 'end': 13542, 'row_cnt': 2}, {'id': 'NC_045512.2', 'type': 'stem_loop', 'name': 'id-GU280_gp11-2', 'start': 29628, 'end': 29657, 'row_cnt': 2}], 'Sars-Cov2_Mature_products': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp1', 'start': 265, 'end': 805, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp2', 'start': 805, 'end': 2719, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp3', 'start': 2719, 'end': 8554, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp4', 'start': 8554, 'end': 10054, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '3CL-PRO', 'start': 10054, 'end': 10972, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp6', 'start': 10972, 'end': 11842, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp7', 'start': 11842, 'end': 12091, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp8', 'start': 12091, 'end': 12685, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp9', 'start': 12685, 'end': 13024, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp10', 'start': 13024, 'end': 13441, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Pol', 'start': 13441, 'end': 16236, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Hel', 'start': 16236, 'end': 18039, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ExoN', 'start': 18039, 'end': 19620, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Uridylate-spec...', 'start': 19620, 'end': 20658, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': "2'-O-methyltra...", 'start': 20658, 'end': 21552, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'S glycoprotein', 'start': 21598, 'end': 25381, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF3a', 'start': 25392, 'end': 26217, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'E protein', 'start': 26244, 'end': 26469, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'M protein', 'start': 26522, 'end': 27188, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ns6', 'start': 27201, 'end': 27384, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF7a', 'start': 27438, 'end': 27756, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ns8', 'start': 27938, 'end': 28256, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'NC', 'start': 28273, 'end': 29530, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'pp1ab', 'start': 265, 'end': 21552, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Spike protein S1', 'start': 21598, 'end': 23617, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Spike protein S2', 'start': 23617, 'end': 25381, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ns7b', 'start': 27755, 'end': 27884, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF-9b', 'start': 28283, 'end': 28574, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'ORF14', 'start': 28733, 'end': 28952, 'row_cnt': 1}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'pp1a', 'start': 265, 'end': 13480, 'row_cnt': 2}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': "Spike protein S2'", 'start': 24007, 'end': 25381, 'row_cnt': 2}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'nsp11', 'start': 13441, 'end': 13480, 'row_cnt': 3}], 'Sars-Cov2_Protein_domains': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Macro', 'start': 3337, 'end': 3847, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Peptidase C16', 'start': 5164, 'end': 5959, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal', 'start': 7003, 'end': 7216, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup1', 'start': 8653, 'end': 9397, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup2', 'start': 9625, 'end': 9646, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Peptidase C30', 'start': 10054, 'end': 10972, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup3', 'start': 11086, 'end': 11089, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup4', 'start': 11230, 'end': 11284, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Lumenal_dup5', 'start': 11515, 'end': 11599, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'RdRp catalytic', 'start': 15273, 'end': 15762, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'CV ZBD', 'start': 16236, 'end': 16488, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '+)RNA virus he...', 'start': 17004, 'end': 17550, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '+)RNA virus he..._dup1', 'start': 17550, 'end': 18060, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Virion surface', 'start': 26244, 'end': 26292, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Intravirion', 'start': 26355, 'end': 26469, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Virion surface_dup1', 'start': 26525, 'end': 26579, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Intravirion_dup1', 'start': 26642, 'end': 26672, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Virion surface_dup2', 'start': 26735, 'end': 26759, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Intravirion_dup2', 'start': 26822, 'end': 27188, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'X4e', 'start': 27438, 'end': 27636, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': '9b', 'start': 28304, 'end': 28574, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'zinc finger', 'start': 5518, 'end': 5632, 'row_cnt': 1}], 'Sars-Cov2_highlights': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Receptor-bindi...', 'start': 22516, 'end': 23185, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Fusion peptide', 'start': 23923, 'end': 23980, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Heptad repeat 1', 'start': 24319, 'end': 24472, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Heptad repeat 2', 'start': 25048, 'end': 25168, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'RNA-binding', 'start': 28393, 'end': 28831, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Dimerization', 'start': 29044, 'end': 29356, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'binds ACE2', 'start': 22870, 'end': 23086, 'row_cnt': 1}], 'Sars-Cov2_TM_domains': [{'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane', 'start': 6940, 'end': 7003, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup1', 'start': 7216, 'end': 7279, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup2', 'start': 7279, 'end': 7342, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup3', 'start': 7345, 'end': 7408, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup4', 'start': 8590, 'end': 8653, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup5', 'start': 9397, 'end': 9460, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup6', 'start': 9493, 'end': 9556, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup7', 'start': 9562, 'end': 9625, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup8', 'start': 9646, 'end': 9709, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup9', 'start': 9757, 'end': 9820, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup10', 'start': 11023, 'end': 11086, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup11', 'start': 11089, 'end': 11152, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup12', 'start': 11167, 'end': 11230, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup13', 'start': 11284, 'end': 11347, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup14', 'start': 11452, 'end': 11515, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup15', 'start': 11599, 'end': 11662, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup16', 'start': 25201, 'end': 25264, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup17', 'start': 25494, 'end': 25557, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup18', 'start': 25602, 'end': 25665, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup19', 'start': 25671, 'end': 25734, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup20', 'start': 26292, 'end': 26355, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup21', 'start': 26579, 'end': 26642, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup22', 'start': 26672, 'end': 26735, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup23', 'start': 26759, 'end': 26822, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup24', 'start': 27678, 'end': 27741, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup25', 'start': 27779, 'end': 27842, 'row_cnt': 0}, {'id': 'NC_045512v2', 'type': 'inferred_parent', 'name': 'Transmembrane_dup26', 'start': 28871, 'end': 28934, 'row_cnt': 0}]}
-
-create_table_summary("table_summary")
-
-
-var type_set = new Set()
-for(key in gffData) {
-  var this_set = new Set(
-    gffData[key].map(function (x) { return x.type })
-  )
-  type_set = new Set([...type_set, ...this_set])
-}
-
-console.log(type_set)
-type_list = Array.from(type_set)
-var annotations_color_scale = d3.scaleOrdinal()
-  .domain(Array.from(type_list))
-  .range(d3.schemeSet3)
-
-function displayGffData(gffData, canvas, annotations_color_scale) {
-
-  num_rows_above = 0
-  for(key in gffData) {
-    create_gff_plot(canvas, height + 40 + num_rows_above * 30, gffData[key], key, annotations_color_scale) 
-    var num_rows = new Set(
-        gffData[key].map(function (x) { return x.row_cnt })
-    ).size
-    num_rows_above += num_rows
-  }
+var coverageData = []
+for (i = 0; i < coverage.length; i++) {
+    coverageData.push({
+        "offset": i,
+        "value": coverage[i],
+    })
 }
 
 // set the dimensions and margins of the graph
@@ -92,7 +83,22 @@ var margin = {
     width = 900 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
 
-// append the svg object to the body of the page
+var x = d3.scaleLinear()
+    .domain([0, coverageData.length - 1])
+    .range([0, width])
+
+var y = d3.scaleLinear()
+    .domain([0, Math.max.apply(Math, coverageData.map(function(item) {
+        return item.value;
+    }))])
+    .range([height, 0]);
+
+var tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0)
+
+// Append the svg object to the body of the page
 var svg = d3.select("#plot")
     .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -101,117 +107,145 @@ var svg = d3.select("#plot")
     .attr("transform",
         "translate(" + margin.left + "," + margin.top + ")");
 
-var data = []
-for (i = 0; i < coverage.length; i++) {
-    data.push({
-        "offset": i,
-        "value": coverage[i],
-        "base": consensus.charAt(i)
-    })
-}
+document.getElementById('sample_name').innerHTML = sample_name;
+setupPlot(svg)
+displayGffData(gffData, svg)
+createSummaryTable("table_summary")
 
-// Add X axis 
-var x = d3.scaleLinear()
-    .domain(d3.extent(data, function(d) {
-        return d.offset;
-    }))
-    .range([0, width])
-xAxis = svg.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).ticks(5))
+function setupPlot(svg) {
+    // Add X axis 
 
-svg.append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 0 - margin.left)
-    .attr("x", 0 - (height / 2))
-    .attr("dy", "1em")
-    .style("text-anchor", "middle")
-    .text("Coverage");
+    xAxis = svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).ticks(5))
 
-svg.append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 0 - margin.left)
-    .attr("x", 0 - margin.bottom + 100)
-    .attr("dy", "1em")
-    .style("text-anchor", "middle")
-    .text("Gene annotations");
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Coverage");
 
-// Add Y axis
-var y = d3.scaleLinear()
-    .domain([0, d3.max(data, function(d) {
-        return +d.value;
-    })])
-    .range([height, 0]);
-yAxis = svg.append("g")
-    .call(d3.axisLeft(y));
-svg.append("text")
-    .attr("transform",
-        "translate(" + (width + margin.left - 20) + " ," +
-        (height + margin.top) + ")")
-    .style("text-anchor", "middle")
-    .text("Offset");
+    // Add Y axis
+    yAxis = svg.append("g")
+        .call(d3.axisLeft(y));
+    svg.append("text")
+        .attr("transform",
+            "translate(" + (width + margin.left - 20) + " ," +
+            (height + margin.top) + ")")
+        .style("text-anchor", "middle")
+        .text("Offset");
 
-// Add a clipPath: everything out of this area won't be drawn.
-var clip = svg.append("defs").append("svg:clipPath")
-    .attr("id", "clip")
-    .append("svg:rect")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("x", 0)
-    .attr("y", 0);
+    // Add a clipPath: everything out of this area won't be drawn.
+    var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0);
 
-// Add brushing that triggers updateChart()
-var brush = d3.brushX()
-    .extent([
-        [0, 0],
-        [width, height]
-    ]) // select the whole graph area
-    .on("end", updateChart)
+    // Add brushing that triggers updateChart()
+    var brush = d3.brushX()
+        .extent([
+            [0, 0],
+            [width, height]
+        ]) // select the whole graph area
+        .on("end", updateChart)
 
-// Create the area variable: where both the area and the brush take place
-var area = svg.append('g')
-    .attr("clip-path", "url(#clip)")
+    // Create the area variable: where both the area and the brush take place
+    var area = svg.append('g')
+        .attr("clip-path", "url(#clip)")
 
-// Create an area generator
-var areaGenerator = d3.area()
-    .x(function(d) {
-        return x(d.offset)
-    })
-    .y0(y(0))
-    .y1(function(d) {
-        return y(d.value)
-    })
-    .curve(d3.curveMonotoneX)
+    // Create an area generator
+    var areaGenerator = d3.area()
+        .x(function(d) {
+            return x(d.offset)
+        })
+        .y0(y(0))
+        .y1(function(d) {
+            return y(d.value)
+        })
+        .curve(d3.curveMonotoneX)
 
-// Add the area
-area.append("path")
-    .datum(data)
-    .attr("class", "myArea")
-    .attr("fill", "steelblue")
-    .attr("fill-opacity", .2)
-    .attr("stroke", "black")
-    .attr("stroke-width", 0)
-    .attr("d", areaGenerator)
+    // Add the area
+    area.append("path")
+        .datum(coverageData)
+        .attr("class", "plot_area")
+        .attr("fill", "steelblue")
+        .attr("fill-opacity", .2)
+        .attr("stroke", "black")
+        .attr("stroke-width", 0)
+        .attr("d", areaGenerator)
 
-var tooltip = d3.select("body")
-    .append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0)
+    // Add the brushing 
+    area.append("g")
+        .attr("class", "brush")
+        .call(brush)
 
-var lollipop_height = Math.max(100, Math.max(...coverage) / 3)
-addLollipops(area, lollipop_height)
-displayGffData(gffData, svg, annotations_color_scale, type_list)
+    // A function that set idleTimeOut to null
+    var idleTimeout
 
-// Add the brushing 
-area.append("g")
-    .attr("class", "brush")
-    .call(brush)
+    function idled() {
+        idleTimeout = null;
+    }
 
-// A function that set idleTimeOut to null
-var idleTimeout
+    var lollipop_height = Math.max(100, Math.max(...coverage) / 3)
+    addLollipops(area, lollipop_height)
 
-function idled() {
-    idleTimeout = null;
+    // If user double click, reinitialize the chart
+    svg.on("dblclick", function() {
+        x.domain([0, coverageData.length - 1])
+        xAxis.transition().call(d3.axisBottom(x).ticks(5))
+        area
+            .select('.plot_area')
+            .transition()
+            .attr("d", areaGenerator)
+        d3.selectAll(".lollipops").remove();
+        d3.selectAll(".circles").remove();
+        d3.selectAll(".annotation_rects").remove();
+        addLollipops(area, lollipop_height)
+        displayGffData(gffData, svg)
+    });
+
+    // A function that update the chart for given boundaries
+    function updateChart() {
+
+        // Get the selected boundaries.
+        extent = d3.event.selection
+
+        // If no selection, back to initial coordinate. Otherwise, update X axis domain
+        if (!extent) {
+            if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+            xAxis.transition().call(d3.axisBottom(x).ticks(5))
+        } else {
+            lower_bound = x.invert(extent[0])
+            upper_bound = x.invert(extent[1])
+
+            if (upper_bound - lower_bound < 10) {
+                middle = (upper_bound + lower_bound) / 2
+                lower_bound = middle - 5
+                upper_bound = middle + 5
+            }
+            x.domain([Math.round(lower_bound), Math.round(upper_bound)])
+            area.select(".brush").call(brush.move, null) // remove the grey brush area as soon as the selection has been done
+        }
+
+        // Update axis and area position
+        xAxis.transition().duration(1000).call(d3.axisBottom(x).ticks(5))
+        area.select('.plot_area')
+            .transition()
+            .duration(1000)
+            .attr("d", areaGenerator)
+
+        // Update the lollipops
+        d3.selectAll(".lollipops").remove();
+        d3.selectAll(".circles").remove();
+        d3.selectAll(".annotation_rects").remove();
+        addLollipops(area, lollipop_height)
+        displayGffData(gffData, svg)
+    }
 }
 
 // Add lollipops
@@ -272,62 +306,44 @@ function addLollipops(canvas, height) {
         })
 }
 
-// A function that update the chart for given boundaries
-function updateChart() {
+function displayGffData(gffData, canvas) {
 
-    // Get the selected boundaries.
-    extent = d3.event.selection
+    canvas.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - margin.bottom + 100)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Gene annotations");
 
-    // If no selection, back to initial coordinate. Otherwise, update X axis domain
-    if (!extent) {
-        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
-      xAxis.transition().call(d3.axisBottom(x).ticks(5))
-    } else {
-        lower_bound = x.invert(extent[0])
-        upper_bound = x.invert(extent[1])
-
-        if (upper_bound - lower_bound < 10) {
-            middle = (upper_bound + lower_bound) / 2
-            lower_bound = middle - 5
-            upper_bound = middle + 5
-        }
-        x.domain([Math.round(lower_bound), Math.round(upper_bound)])
-        area.select(".brush").call(brush.move, null) // remove the grey brush area as soon as the selection has been done
+    var type_set = new Set()
+    for (key in gffData) {
+        var this_set = new Set(
+            gffData[key].map(function(x) {
+                return x.type
+            })
+        )
+        type_set = new Set([...type_set, ...this_set])
     }
 
-    // Update axis and area position
-    xAxis.transition().duration(1000).call(d3.axisBottom(x).ticks(5))
-    area.select('.myArea')
-        .transition()
-        .duration(1000)
-        .attr("d", areaGenerator)
+    type_list = Array.from(type_set)
+    var annotations_color_scale = d3.scaleOrdinal()
+        .domain(type_list)
+        .range(d3.schemeSet3)
 
-    // Update the lollipops
-    d3.selectAll(".lollipops").remove();
-    d3.selectAll(".circles").remove();
-    d3.selectAll(".annotation_rects").remove();
-    addLollipops(area, lollipop_height)
-    displayGffData(gffData, svg, annotations_color_scale, type_list)
+    num_rows_above = 0
+    for (key in gffData) {
+        createGffPlot(canvas, height + 40 + num_rows_above * 30, gffData[key], key, annotations_color_scale)
+        var num_rows = new Set(
+            gffData[key].map(function(x) {
+                return x.row_cnt
+            })
+        ).size
+        num_rows_above += num_rows
+    }
 }
 
-// If user double click, reinitialize the chart
-svg.on("dblclick", function() {
-    x.domain(d3.extent(data, function(d) {
-        return d.offset;
-    }))
-    xAxis.transition().call(d3.axisBottom(x).ticks(5))
-    area
-        .select('.myArea')
-        .transition()
-        .attr("d", areaGenerator)
-    d3.selectAll(".lollipops").remove();
-    d3.selectAll(".circles").remove();
-    d3.selectAll(".annotation_rects").remove();
-    addLollipops(area, lollipop_height)
-    displayGffData(gffData, svg, annotations_color_scale, type_list)
-});
-
-function create_gff_plot(canvas, offset_y, features, title, colorScale, type_list) {
+function createGffPlot(canvas, offset_y, features, title, colorScale, type_list) {
   // Keep only the annotations in the strat-end interval.
   canvas.append("text")
     .attr("transform",
@@ -380,53 +396,9 @@ function create_gff_plot(canvas, offset_y, features, title, colorScale, type_lis
           .duration(200)
           .style("opacity", 0)
       })
-
-/*      svg.selectAll("labels")
-        .data(gffData.features)
-        .enter()
-        .append("text")
-          .attr("x", function(d) {
-            return x(d.start) + x(d.end - d.start) / 2
-          })
-          .attr("y", function(d) { return 15 })
-          .text(function(d) {
-            return (d.end - d.start) > 2000 ? d.name : ""
-          })*/
-
-  // add legend
-/*  var size = 10
-
-  var legendHolder = canvas.append("g")
-    .attr("transform", "translate(" + (width + 10) + ", 0)")
-
-
-  legendHolder.selectAll("legend_rects")
-    .data(type_list)
-    .enter()
-    .append("rect")
-      .attr("x", 0)
-      .attr("y", function(d, i) { return i * (size + 5) })
-      .attr("width", size)
-      .attr("height", size)
-      .style("fill", function(d) { return colorScale(d) })
-      .attr("class", "annotation_texts")
-
-
-  legendHolder.selectAll("legend_labels")
-    .data(type_list)
-    .enter()
-    .append("text")
-      .attr("x", size * 1.2)
-      .attr("y", function(d, i) { return i * (size + 5) + (size / 2) })
-      .style("fill", "black")
-      .text(function(d) { return d })
-      .attr("text-anchor", "left")
-      .style("alignment-baseline", "middle")
-      .style("font-size", size + "px")
-      .attr("class", "annotation_labels")*/
 }
 
-function create_table_summary(div_id) {
+function createSummaryTable(div_id) {
   // create table
   var tbl = document.createElement("table")
   tbl.setAttribute("id", "table_summary_table")
@@ -471,11 +443,115 @@ function create_table_summary(div_id) {
   container.appendChild(tbl)
 }
 
+function createGffPlot(canvas, offset_y, features, title, colorScale, type_list) {
+    // Keep only the annotations in the strat-end interval.
+    canvas.append("text")
+        .attr("transform",
+            "translate(" + 0 + " ," +
+            (offset_y) + ")")
+        //.style("text-anchor", "middle")
+        .text(title + ":");
+
+    canvas.selectAll("rects")
+        .data(features)
+        .enter()
+        .append("rect")
+        .attr("x", function(d) {
+            return Math.max(0, x(d.start))
+        })
+        .attr("y", function(d) {
+            return offset_y + 10 + 20 * d.row_cnt
+        })
+        .attr("width", function(d) {
+            if (x(d.start) > width || x(d.end) < 0) {
+                return 0
+            }
+            x_start = Math.max(0, x(d.start))
+            rect_width = x(d.end) - x_start
+            if (x(d.end) < width) {
+                return rect_width
+            } else {
+                return width - x_start
+            }
+        })
+        .attr("height", 15)
+        .attr("fill", function(d) {
+            return colorScale(d.type)
+        })
+        .attr("stroke", "black")
+        .attr("stroke-width", 1)
+        .attr("class", "annotation_rects")
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9)
+            tooltip.html(
+                    "name: " + d.name + "<br>" +
+                    "type: " + d.type
+                )
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+        })
+        .on("mousemove", function(d) {
+            tooltip
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px")
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0)
+        })
+}
+
+function createSummaryTable(div_id) {
+    // create table
+    var tbl = document.createElement("table")
+    tbl.setAttribute("id", "table_summary_table")
+
+    // add header
+    var header = tbl.createTHead()
+    var tr_0 = header.insertRow()
+    var td = tr_0.insertCell()
+    var num_cols = 0
+    for (var key in vcfData[0]) {
+        num_cols++
+    }
+    td.setAttribute("colspan", num_cols)
+    td.setAttribute("style", "text-align:center")
+    td.innerHTML = "<b>SNVs</b>"
+
+    var tr = header.insertRow()
+    for (var key in vcfData[0]) {
+        // assumes all entries have same keys
+        var td = tr.insertCell()
+        bold = document.createElement('strong'),
+            bold.appendChild(document.createTextNode(key));
+        td.appendChild(bold)
+    }
+
+    // add content
+    vcfData.sort((r1, r2) => r1.position - r2.position);
+
+    for (var entry of vcfData) {
+        var tr = tbl.insertRow()
+
+        for (var key in entry) {
+            var value = entry[key]
+            var td = tr.insertCell()
+
+            td.appendChild(document.createTextNode(value))
+        }
+    }
+
+    // add table to container
+    var container = document.getElementById(div_id)
+    container.appendChild(tbl)
+}
 
 </script>
 
-</body>
-</html>
+
 
 
 
