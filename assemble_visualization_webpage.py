@@ -103,10 +103,7 @@ def main(sample_name, coverage_files, vcf_file, gff_dir, consensus_fasta, html_f
         var vcfData = {vcf_json}
         var gffData = {gff_map}
     """
- 
-    print(embed_code)
-
-    '''
+    
     # assemble webpage
     with open(html_file_in) as fd:
         raw_html = fd.read()
@@ -116,7 +113,6 @@ def main(sample_name, coverage_files, vcf_file, gff_dir, consensus_fasta, html_f
 
     with open(html_file_out, 'w') as fd:
         fd.write(mod_html)
-    '''
 
 _CONSENSUS = "/Users/mdragan/ivan_vpipe_branch//V-pipe/samples/SRR10903401/20200102/references/ref_majority.fasta"
 _VCF_FILE = "/Users/mdragan/ivan_vpipe_branch//V-pipe/samples/SRR10903402/20200102/variants/SNVs/REGION_1/snv/SNVs_0.010000_final.vcf"
@@ -124,9 +120,8 @@ _GFF_DIRECTORY = "/Users/mdragan/Downloads/gffs/"
 _SNV_DIR = "/Users/mdragan/ivan_vpipe_branch/V-pipe/samples/SRR10903401/20200102/variants/SNVs"
 
 coverage_files = [os.path.join(_SNV_DIR, f, "coverage.txt") for f in os.listdir(_SNV_DIR) if re.match("REGION_[1-9]+[0-9]*", f)]
-print(coverage_files)
 
-main("Sample", coverage_files, _VCF_FILE, _GFF_DIRECTORY, _CONSENSUS, "", "")
+main("Sample", coverage_files, _VCF_FILE, _GFF_DIRECTORY, _CONSENSUS, "coverage.html", "out.html")
 
 
 '''
