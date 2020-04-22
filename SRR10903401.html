@@ -285,7 +285,7 @@ function addLollipops(canvas) {
             return x(d.position)
         })
         .attr("y1", function(d) {
-            return yLollipop(d.frequency)
+            return yLollipop(Math.max(0.05, d.frequency))
         })
         .attr("y2", y(0))
         .attr("stroke", "darkgrey")
@@ -299,7 +299,7 @@ function addLollipops(canvas) {
             return x(d.position)
         })
         .attr("cy", function(d) {
-            return yLollipop(d.frequency)
+            return yLollipop(Math.max(0.05, d.frequency))
         })
         .attr("r", "4")
         .style("fill", "grey")
@@ -369,6 +369,9 @@ function displayGffData(gffData, canvas) {
 }
 
 function createSummaryTable(div_id) {
+
+  console.log("lalala")
+
   // create table
   var tbl = document.createElement("table")
   tbl.setAttribute("id", "table_summary_table")
@@ -403,7 +406,11 @@ function createSummaryTable(div_id) {
     for(var key in entry) {
       var value = entry[key]
       var td = tr.insertCell()
-
+      console.log(value)
+      console.log(Number(value) === value)
+      if(Number(value) === value) {
+        value = value.toFixed(3)
+      }
       td.appendChild(document.createTextNode(value))
     }
   }
@@ -530,6 +537,10 @@ function createSummaryTable(div_id) {
         for (var key in entry) {
             var value = entry[key]
             var td = tr.insertCell()
+
+      if(Number(value) === value) {
+        value = value.toFixed(3)
+      }
 
             td.appendChild(document.createTextNode(value))
         }
