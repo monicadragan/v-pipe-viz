@@ -484,7 +484,7 @@ function createGffPlot(canvas, offset_y, features, title, colorScale, type_list)
             updateChartGlobal([d.start, d.end], true)
         })
 
-    /*canvas.selectAll("lines")
+    canvas.selectAll("lines")
         .data(vcfData)
         .enter()
         .append("line")
@@ -500,7 +500,7 @@ function createGffPlot(canvas, offset_y, features, title, colorScale, type_list)
         .attr("y2", offset_y + rectHeight)
         .attr("stroke", "red")
         .attr("class", "snv_marker")
-     */
+    
 }
 
 function createSummaryTable(div_id) {
