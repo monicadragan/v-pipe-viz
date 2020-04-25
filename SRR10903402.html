@@ -113,7 +113,11 @@ div.tooltip_plot {
         <div id="plot"></div>
         <div>
             <div id="controls">
-                Color legend for SNV posterior probability: <br/>
+                Color legend for SNV posterior probability 
+                <div class="tooltip"><i class="fa fa-question-circle"></i>
+                  <span class="tooltiptext">Color legend for the lollipop circles that appear on the plot. Blue color indicates a posterior probability of 1, while red indicates probability 0.</span>
+                </div>
+                <br/>
                 <div id="color_legend"></div>
                 <label for="posteriorThresholdField">SNV posterior probability threshold:</label>
                 <input type="text" id="posteriorThresholdField" value="0.8", size=4>
