@@ -1,0 +1,26 @@
+<html>
+<body>
+<form action="https://beta.swissmodel.expasy.org/repository/user_annotation_upload" id="uploadForm" enctype="multipart/form-data" method="POST">
+
+
+<input type="hidden" name="csrfmiddlewaretoken" value="vp6ak0c7ffGb8U0v3U5A8FP5XUuK42nPnmDehrjjj07DhejR5yquEIc6t8VeY96M">
+
+<textarea style="display:none;" name="annotation_data" cols="40" rows="10" minlength="13" id="id_annotation_data">
+P0DTD1	1	10	#000000	nsp1_1-10_uncovered
+P0DTD1	10	20	#FF0000	https://swissmodel.expasy.org/	nsp1_10-20_part_covered
+P0DTD1	40	100	#00FF00	nsp1_40-100_covered
+P0DTD1	1050	1100	#0000FF	A text reference	nsp3_232-382_covered
+P0DTD1	1150	1250	#00FFFF	nsp3_332-432_covered_multi
+P0DTD1	4800	4900	#FF00FF	Pol/RdRp_408-508_covered
+P0DTC2	1000	1100	#FFFF00	S glycoprotein_1000-1100_covered
+</textarea>
+
+<a href="#" onclick="document.getElementById('uploadForm').submit();">link</a>
+<!--
+<button style="margin:12px" id="submitButton" type="submit" class="btn btn-primary btn-lg">Upload Annotations</button>
+<input type="hidden" id="file_id" name="file_id">
+-->
+</form>
+
+</body>
+</html>
