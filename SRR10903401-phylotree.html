@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+  <link href="http://veg.github.io/phylotree.js/phylotree.css" rel="stylesheet">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script type="text/javascript" src="phylotree.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
+  <style>
+#code {
+  display: inline-block;
+  width: 700px;
+  padding-left: 50px;
+}
+
+#block_container > div {
+    float: left;
+    margin-right: 40px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+  </style>
+</head>
+
+<body>
+<div id="block_container">
+  <div>
+    <h4>Human SARS-CoV-2</h4>
+    <svg id="tree_display_0" />
+  </div>
+</div>
+
+  <script>
+    var example_tree_0 = "(NC_045512.2:0.00000000,(SRR10903401-20200102:0.00000100,(((((USA/CA-PC101P/2020:0.00003344,(Basel-100792_109_A8/20200409:0.00003344,Basel-100795_109_B4/20200409:0.00010034):0.00003344):0.00000100,Spain/Valencia1/2020:0.00003344):0.00013379,((Yunnan/IVDC-YN-003/2020:0.00000100,USA/AZ1/2020:0.00003344):0.00003344,((USA/TX1/2020:0.00013379,(Shenzhen/HKU-SZ-002/2020:0.00000100,Japan/TY-WK-521/2020:0.00006689):0.00000100):0.00003344,(Taiwan/NTU01/2020:0.00000100,USA/MN1-MDH1/2020:0.00080495):0.00000100):0.00000100):0.00006689):0.00000100,((((Brazil/SPBR-02/2020:0.00003344,Basel-100790_109_A5/20200409:0.00000100):0.00003344,USA/WA3-UW1/2020:0.00033456):0.00006689,Australia/VIC01/2020:0.00006689):0.00000100,(Sweden/01/2020:0.00020070,SouthKorea/SNU01/2020:0.00026763):0.00000100):0.00003344):0.00000100,((((Finland/1/2020:0.00000100,USA/IL1/2020:0.00000100):0.00000100,(Wuhan/IPBCAMS-WH-05/2020:0.00003344,(USA/MA1/2020:0.00010034,Nepal/61/2020:0.00000100):0.00003344):0.00000100):0.00000100,Wuhan/WH03/2020:0.00000100):0.00000100,(Shanghai/SH01/2020:0.00006689,Wuhan/WH01/2019:0.00006689):0.00000100):0.00000100):0.00000100):0.00000100,Wuhan-Hu-1/2019:0.00000000):0.00000000;"
+
+    var tree = d3.layout.phylotree()
+      // create a tree layout object
+      .svg(d3.select("#tree_display_0"))
+      .options({
+            'selectable': false,
+            // make nodes and branches not selectable
+            'collapsible': false,
+            // turn off the menu on internal nodes
+            'transitions': false
+          })
+       //.style_edges(edgeStyler)
+       //.style_nodes(nodeStyler)
+       .node_circle_size(0) // do not draw clickable circles for internal nodes
+
+    tree(example_tree_0)
+      // parse the Newick into a d3 hierarchy object with additional fields
+      .layout();
+    // layout and render the tree
+
+    // for syntax highlighting
+    hljs.initHighlightingOnLoad();
+
+  </script>
+
+</body>
+
+</html>
